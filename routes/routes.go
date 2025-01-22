@@ -1,18 +1,20 @@
 package routes
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"gopkg.in/mgo.v2"
 
 	"github.com/dracuxan/GoMongo/controllers"
 )
 
-var url string = "mongodb://localhost:27107"
+var url string = "mongodb://127.0.0.1:27017/"
 
 func getSession() *mgo.Session {
 	s, err := mgo.Dial(url)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	return s
