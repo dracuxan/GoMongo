@@ -1,27 +1,35 @@
 package routes
 
 import (
+	"context"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/dracuxan/GoMongo/controllers"
 )
 
 var url string = "mongodb://127.0.0.1:27017/"
 
-func getSession() *mgo.Session {
-	s, err := mgo.Dial(url)
+func getSession() *mongo.Client {
+	clientOptions := options.Client().ApplyURI(url)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error creating mongo client:", err)
 	}
 
-	return s
+	return client
 }
 
 func Routes(app *fiber.App) {
-	uc := controllers.NewUserController(getSession())
+	client := getSession()
+	db := client.Database("GoMongo")
+	uc := controllers.NewUserController(db)
 
 	app.Get("/users", uc.GetUsers)
 	app.Get("/user/:id", uc.GetUser)

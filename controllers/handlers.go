@@ -1,33 +1,36 @@
 package controllers
 
 import (
+	"context"
+	"time"
+
 	"github.com/gofiber/fiber/v2"
-	"gopkg.in/mgo.v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gopkg.in/mgo.v2/bson"
 
 	"github.com/dracuxan/GoMongo/models"
 )
 
 type UserController struct {
-	Session *mgo.Session
+	Database *mongo.Database
 }
 
-func NewUserController(s *mgo.Session) *UserController {
-	return &UserController{s}
+func NewUserController(db *mongo.Database) *UserController {
+	return &UserController{Database: db}
 }
 
 func (uc *UserController) GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
-
-	if !bson.IsObjectIdHex(id) {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user id not found"})
+	objeID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid user ID"})
 	}
-	fid := bson.ObjectIdHex(id)
 	u := models.User{}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	if err := uc.Session.DB("GoMongo").C("users").FindId(fid).One(&u); err != nil {
-		c.Status(fiber.StatusNotFound)
-	}
+	err = uc.Database.Collection("user").FindOne(ctx, bson.M{"_id": objeID}).Decode(&u)
 
 	return c.Status(fiber.StatusOK).JSON(u)
 }
