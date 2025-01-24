@@ -9,6 +9,6 @@ POST /user/:id: Update an existing user info
 DELETE /user/:id: Delete an existing user
 ```
 ### Check List
-[] Controllers
-[x] Models
-[x] Routes
+- [ ] Controllers
+- [x] Models
+- [x] Routes
