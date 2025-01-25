@@ -1,6 +1,7 @@
 # CRUD API using Go [Fiber] and MongoDB
 
 ## API Endpoints
+
 ```
 GET /users: Get the list of users
 GET /user/:id: Get a particular user
