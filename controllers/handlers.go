@@ -36,7 +36,31 @@ func (uc *UserController) GetUser(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) GetUsers(c *fiber.Ctx) error {
-	return nil
+	var users []models.User
+	collection := uc.Database.Collection("user") // Ensure collection name matches
+	filter := bson.D{}
+
+	curr, err := collection.Find(context.Background(), filter)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{"error": "failed to fetch users"})
+	}
+	defer curr.Close(context.Background())
+
+	for curr.Next(context.Background()) {
+		var result models.User
+		if err := curr.Decode(&result); err != nil {
+			return c.Status(fiber.StatusInternalServerError).
+				JSON(fiber.Map{"error": "failed to decode user"})
+		}
+		users = append(users, result)
+	}
+
+	if err := curr.Err(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "cursor error"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(users)
 }
 
 func (uc *UserController) CreateUser(c *fiber.Ctx) error {
