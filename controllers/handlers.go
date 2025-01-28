@@ -30,14 +30,14 @@ func (uc *UserController) GetUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = uc.Database.Collection("user").FindOne(ctx, bson.M{"_id": objeID}).Decode(&u)
+	err = uc.Database.Collection("users").FindOne(ctx, bson.M{"_id": objeID}).Decode(&u)
 
 	return c.Status(fiber.StatusOK).JSON(u)
 }
 
 func (uc *UserController) GetUsers(c *fiber.Ctx) error {
 	var users []models.User
-	collection := uc.Database.Collection("user") // Ensure collection name matches
+	collection := uc.Database.Collection("users") // Ensure collection name matches
 	filter := bson.D{}
 
 	curr, err := collection.Find(context.Background(), filter)
@@ -64,6 +64,7 @@ func (uc *UserController) GetUsers(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) CreateUser(c *fiber.Ctx) error {
+	// u := models.User{}
 	return nil
 }
 
