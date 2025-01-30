@@ -13,5 +13,5 @@ DELETE /user/:id: Delete an existing user
 - [x] Models
 - [x] Routes
 - [ ] Controllers
-- [ ] Workflows
+- [x] Workflows
 - [ ] Test files
