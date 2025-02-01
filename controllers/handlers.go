@@ -103,6 +103,21 @@ func (uc *UserController) CreateUser(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
+	// user := models.User{}
+	//
+	// if err := c.BodyParser(&user); err != nil {
+	// 	return c.Status(fiber.StatusBadRequest).
+	// 		JSON(fiber.Map{"error": "Unable to parse json body"})
+	// }
+	//
+	// coll := uc.Database.Collection("users")
+	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	// defer cancel()
+	//
+	// res, err := coll.UpdateOne(ctx, user.Id, user)
+	// if err != nil {
+	// 	return c.SendStatus(fiber.StatusBadRequest)
+	// }
 	return nil
 }
 
