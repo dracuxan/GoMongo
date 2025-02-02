@@ -1,4 +1,3 @@
-# Variable names
 APP_NAME := fs
 BUILD_DIR := bin
 MAIN_FILE := main.go
