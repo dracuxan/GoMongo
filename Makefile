@@ -2,7 +2,7 @@ APP_NAME := fs
 BUILD_DIR := bin
 MAIN_FILE := main.go
 
-all: build
+all: deps build
 
 build:
 	@mkdir -p $(BUILD_DIR)
