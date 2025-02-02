@@ -103,24 +103,71 @@ func (uc *UserController) CreateUser(c *fiber.Ctx) error {
 }
 
 func (uc *UserController) UpdateUser(c *fiber.Ctx) error {
-	// user := models.User{}
-	//
-	// if err := c.BodyParser(&user); err != nil {
-	// 	return c.Status(fiber.StatusBadRequest).
-	// 		JSON(fiber.Map{"error": "Unable to parse json body"})
-	// }
-	//
-	// coll := uc.Database.Collection("users")
-	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// defer cancel()
-	//
-	// res, err := coll.UpdateOne(ctx, user.Id, user)
-	// if err != nil {
-	// 	return c.SendStatus(fiber.StatusBadRequest)
-	// }
-	return nil
+	fid := c.Params("id")
+
+	objId, err := primitive.ObjectIDFromHex(fid)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
+	}
+
+	updateUser := make(map[string]interface{})
+
+	if err = c.BodyParser(&updateUser); err != nil {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{"error": "Unable to parse json body"})
+	}
+
+	if len(updateUser) == 0 {
+		return c.Status(fiber.StatusBadRequest).
+			JSON(fiber.Map{"error": "No fields provided for update"})
+	}
+	coll := uc.Database.Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": objId}
+	update := bson.M{"$set": updateUser}
+
+	res, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{"error": "Failed to update user", "details": err.Error()})
+	}
+
+	if res.MatchedCount == 0 {
+		return c.Status(fiber.StatusNotFound).
+			JSON(fiber.Map{"error": "User not found"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message":       "User updated successfully",
+		"matchedCount":  res.MatchedCount,
+		"modifiedCount": res.ModifiedCount,
+	})
 }
 
 func (uc *UserController) DeleteUser(c *fiber.Ctx) error {
-	return nil
+	id := c.Params("id")
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid user id"})
+	}
+
+	coll := uc.Database.Collection("users")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": objId}
+	res, err := coll.DeleteOne(ctx, filter)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).
+			JSON(fiber.Map{"error": "failed to delete user"})
+	}
+
+	if res.DeletedCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "user not found"})
+	}
+
+	return c.Status(fiber.StatusOK).
+		JSON(fiber.Map{"message": "User deleted successfully", "deleteCount": res.DeletedCount})
 }
