@@ -12,6 +12,6 @@ DELETE /user/:id: Delete an existing user
 ### Check List
 - [x] Models
 - [x] Routes
-- [ ] Controllers
+- [x] Controllers
 - [x] Workflows
 - [ ] Test files
